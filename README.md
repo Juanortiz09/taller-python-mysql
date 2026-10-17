@@ -29,3 +29,24 @@ python main.py
 Consultar los registros en DBeaver con:
 
 SELECT COUNT(*) FROM personas_juanpablo;
+
+## Estructura del proyecto
+
+- `main.py`: genera e inserta los registros.
+- `requirements.txt`: contiene las dependencias.
+- `.env.example`: muestra la configuración necesaria.
+- `.gitignore`: excluye archivos privados y temporales.
+
+## Tecnologías utilizadas
+
+- Python 3.10 o superior
+- MySQL
+- SQLAlchemy
+- Faker
+- PyMySQL
+- python-dotenv
+
+## Base de datos
+
+La tabla utilizada es `personas_juanpablo` y contiene
+100.000 registros ficticios generados por lotes de 5.000.
