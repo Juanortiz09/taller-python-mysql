@@ -68,3 +68,23 @@ Para visualizar los primeros 10 registros:
 ```sql
 SELECT * FROM personas_juanpablo LIMIT 10;
 ```
+
+
+## Instalación y ejecución
+
+1. Instalar Python 3.10 o superior.
+2. Crear y activar un entorno virtual.
+3. Instalar las dependencias:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+4. Configurar la variable `DB_URL` en el archivo `.env` con los datos de conexión a MySQL.
+5. Ejecutar el programa:
+
+```bash
+python main.py
+```
+
+El programa crea la tabla si no existe y genera los registros por lotes de 5000.
