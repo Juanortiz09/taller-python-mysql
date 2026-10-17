@@ -1,22 +1,22 @@
 
+
 import os
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, String, Integer
+from sqlalchemy import create_engine, String, Integer, func, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 from faker import Faker
 
-# Cargar la configuracion de conexion
+# Cargar la configuración de conexión
 load_dotenv()
 DATABASE_URL = os.getenv("DB_URL")
 
 if not DATABASE_URL:
-    raise ValueError("No se encontro DB_URL en el archivo .env")
+    raise ValueError("No se encontró DB_URL en el archivo .env")
 
 # Conectar con MySQL
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
 
-# Crear la clase base
 class Base(DeclarativeBase):
     pass
 
@@ -35,37 +35,54 @@ class Persona(Base):
     trabajo: Mapped[str] = mapped_column(String(120))
 
 
-# Crear la tabla en MySQL
+# Crear la tabla si todavía no existe
 Base.metadata.create_all(engine)
 
-# Preparar la sesion y los datos ficticios
 Session = sessionmaker(bind=engine)
 fake = Faker("es_CO")
 
 TOTAL = 100_000
 LOTE = 5_000
 
-# Generar e insertar los registros por lotes
 with Session() as session:
-    for inicio in range(0, TOTAL, LOTE):
-        personas = []
+    # Consultar cuántos registros existen
+    existentes = session.scalar(
+        select(func.count()).select_from(Persona)
+    )
 
-        for i in range(inicio, min(inicio + LOTE, TOTAL)):
-            persona = Persona(
-                nombre=fake.first_name(),
-                apellido=fake.last_name(),
-                correo=f"persona{i}@example.com",
-                telefono=fake.numerify(text="3#########"),
-                ciudad=fake.city(),
-                direccion=fake.address().replace("\n", " "),
-                trabajo=fake.job(),
-            )
-            personas.append(persona)
+    if existentes >= TOTAL:
+        print(f"La tabla ya tiene {existentes} personas. No se insertaron más registros.")
+    else:
+        faltantes = TOTAL - existentes
+        print(f"Hay {existentes} personas. Se generarán {faltantes} más.")
 
-        session.add_all(personas)
-        session.commit()
+        siguiente = session.scalar(
+            select(func.max(Persona.id))
+        ) or 0
 
-        insertados = min(inicio + LOTE, TOTAL)
-        print(f"Insertados {insertados} de {TOTAL}")
+        generados = 0
 
-print("Proceso terminado. Se generaron 100.000 personas.")
+        while generados < faltantes:
+            cantidad = min(LOTE, faltantes - generados)
+            personas = []
+
+            for _ in range(cantidad):
+                siguiente += 1
+                persona = Persona(
+                    nombre=fake.first_name(),
+                    apellido=fake.last_name(),
+                    correo=f"persona_{siguiente}@example.com",
+                    telefono=fake.numerify(text="3#########"),
+                    ciudad=fake.city(),
+                    direccion=fake.address().replace("\n", " "),
+                    trabajo=fake.job(),
+                )
+                personas.append(persona)
+
+            session.add_all(personas)
+            session.commit()
+
+            generados += cantidad
+            print(f"Insertados {generados} de {faltantes} nuevos registros.")
+
+print("Proceso terminado.")
