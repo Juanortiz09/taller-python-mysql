@@ -50,3 +50,21 @@ SELECT COUNT(*) FROM personas_juanpablo;
 
 La tabla utilizada es `personas_juanpablo` y contiene
 100.000 registros ficticios generados por lotes de 5.000.
+
+## Verificación de los datos
+
+Para comprobar que los registros se guardaron correctamente en MySQL, ejecutar estas consultas:
+
+```sql
+USE personas_juanpablo;
+
+SELECT COUNT(*) FROM personas_juanpablo;
+```
+
+El resultado esperado es de 100000 registros.
+
+Para visualizar los primeros 10 registros:
+
+```sql
+SELECT * FROM personas_juanpablo LIMIT 10;
+```
